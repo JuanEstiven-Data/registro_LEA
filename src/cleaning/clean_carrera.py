@@ -27,12 +27,12 @@ def clean_carrera(df: pd.DataFrame) -> pd.DataFrame:
     df.loc[mask_roles, 'carrera_norm'] = 'no aplica'
 
     # Aplicación del Mapeo
-    df['carrera_final'] = apply_mapping(df['carrera_norm'], CARRERA_MAPPING, 'carrera')
+    df['carrera'] = apply_mapping(df['carrera_norm'], CARRERA_MAPPING, 'carrera')
 
     # Formato Estético Final para el Dashboard
-    df['carrera_final'] = df['carrera_final'].str.title()
-    mask_na = df['carrera_final'].str.lower() == 'no aplica'
-    df.loc[mask_na, 'carrera_final'] = 'NO APLICA'
+    df['carrera'] = df['carrera'].str.title()
+    mask_na = df['carrera'].str.lower() == 'no aplica'
+    df.loc[mask_na, 'carrera'] = 'NO APLICA'
 
     # Eliminar 'carrera_norm' para mantener el DataFrame ligero
     df = df.drop(columns=['carrera_norm'])

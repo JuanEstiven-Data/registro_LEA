@@ -1,3 +1,8 @@
+"""
+Diccionario de normalización de Cursos de la Universidad.
+Las llaves (keys) deben estar en minúsculas y sin tildes, ya que el texto
+se normaliza antes de pasar por este mapeo.
+"""
 CURSO_MAPPING = {
 
     # ======================

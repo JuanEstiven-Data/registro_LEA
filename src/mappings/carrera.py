@@ -1,4 +1,8 @@
-# Diccionario de normalización de CARRERAS
+"""
+Diccionario de normalización de Carreras de la Universidad
+Las llaves (keys) deben estar en minúsculas y sin tildes, ya que el texto
+se normaliza antes de pasar por este mapeo.
+"""
 CARRERA_MAPPING = {
     # --- CIENCIAS ECONÓMICAS ---
     'administracion de empresas': 'Administración de Empresas',

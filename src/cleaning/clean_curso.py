@@ -28,14 +28,14 @@ def clean_curso(df: pd.DataFrame) -> pd.DataFrame:
     )
 
     # Aplicación del Mapeo
-    df['curso_final'] = apply_mapping(df['curso_norm'], CURSO_MAPPING, 'curso')
+    df['curso'] = apply_mapping(df['curso_norm'], CURSO_MAPPING, 'curso')
 
     # Formato Estético Final para el Dashboard
-    df['curso_final'] = df['curso_final'].str.title()
+    df['curso'] = df['curso'].str.title()
     
     # Aseguramos que 'Sin Información' quede bien escrito si hubo nulos
-    mask_sin_info = df['curso_final'].str.lower() == 'sin información'
-    df.loc[mask_sin_info, 'curso_final'] = 'Sin Información'
+    mask_sin_info = df['curso'].str.lower() == 'sin información'
+    df.loc[mask_sin_info, 'curso'] = 'Sin Información'
 
     # Limpieza de memoria
     df = df.drop(columns=['curso_norm'])

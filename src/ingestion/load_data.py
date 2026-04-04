@@ -72,7 +72,9 @@ def load_excels_from_folder(path: str)-> pd.DataFrame:
     "fecha": "mes",
     "nombres_y_apellidos": "nombre_completo",
     "actividad_simulador,_taller,_uso_de_equipos,_etc.": "actividades",
-    "correo_institucional": "email"
+    "correo_institucional": "email",
+    "profesor_encargado_si_aplica": "profesor_encargado",
+    "monitor_encargado_si_aplica": "monitor_encargado"
     }
     combined_df = combined_df.rename(columns=diccionario_mapeo)
 

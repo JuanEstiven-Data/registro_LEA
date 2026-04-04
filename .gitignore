@@ -5,3 +5,4 @@ data/raw/
 data/processed/
 .vscode/
 .ipynb_checkpoints/
+src/mappings/staff.py
