@@ -1,0 +1,92 @@
+2026-04-05 01:17:36,626 | main.py:43 | run_pipeline() | INFO | ==================================================
+2026-04-05 01:17:36,626 | main.py:44 | run_pipeline() | INFO | INICIANDO PIPELINE DE DATOS - REGISTRO LEA
+2026-04-05 01:17:36,626 | main.py:45 | run_pipeline() | INFO | ==================================================
+2026-04-05 01:17:36,797 | load_data.py:46 | load_excels_from_folder() | INFO | Cargado exitosamente: Registro_LEA2024.xlsx
+2026-04-05 01:17:36,835 | load_data.py:46 | load_excels_from_folder() | INFO | Cargado exitosamente: Registro_LEA2025.xlsx
+2026-04-05 01:17:36,837 | main.py:60 | run_pipeline() | INFO | Dataset consolidado inicial: 2022 registros.
+2026-04-05 01:17:36,837 | clean_date.py:21 | clean_dates() | INFO | Iniciando transformación de fechas y periodos académicos...
+2026-04-05 01:17:36,843 | clean_date.py:69 | clean_dates() | INFO | Transformación temporal finalizada exitosamente.
+2026-04-05 01:17:36,843 | clean_carrera.py:14 | clean_carrera() | INFO | Iniciando limpieza de la columna 'carrera'...
+2026-04-05 01:17:36,851 | text_utils.py:44 | apply_mapping() | WARNING | [carrera] Hay 3 categorías no mapeadas.
+2026-04-05 01:17:36,851 | text_utils.py:45 | apply_mapping() | WARNING | Valores: {'egresada', 'no aplica', 'pregrado'}
+2026-04-05 01:17:36,853 | clean_carrera.py:40 | clean_carrera() | INFO | Limpieza de 'carrera' finalizada exitosamente.
+2026-04-05 01:17:36,854 | clean_curso.py:14 | clean_curso() | INFO | Iniciando limpieza de la columna 'curso'...
+2026-04-05 01:17:36,859 | text_utils.py:44 | apply_mapping() | WARNING | [curso] Hay 1 categorías no mapeadas.
+2026-04-05 01:17:36,860 | text_utils.py:45 | apply_mapping() | WARNING | Valores: {'sin informacion'}
+2026-04-05 01:17:36,862 | clean_curso.py:43 | clean_curso() | INFO | Limpieza de 'curso' finalizada exitosamente.
+2026-04-05 01:17:36,862 | clean_semestre.py:13 | clean_semestre() | INFO | Iniciando limpieza de la columna 'semestre'...
+2026-04-05 01:17:36,864 | clean_semestre.py:29 | clean_semestre() | INFO | Limpieza de 'semestre' finalizada exitosamente.
+2026-04-05 01:17:36,864 | clean_actividades.py:10 | clean_actividades() | INFO | Iniciando limpieza de la columna 'actividades'...
+2026-04-05 01:17:36,869 | clean_actividades.py:22 | clean_actividades() | INFO | Limpieza de 'actividades' finalizada exitosamente.
+2026-04-05 01:17:36,869 | clean_staff.py:14 | clean_staff() | INFO | Iniciando estandarización de profesores y monitores...
+2026-04-05 01:17:36,878 | clean_staff.py:33 | clean_staff() | INFO | Estandarización de staff finalizada exitosamente.
+2026-04-05 01:17:36,878 | anonymization.py:13 | anonymize_data() | INFO | Iniciando proceso de pseudonimización estructurada...
+2026-04-05 01:17:36,895 | anonymization.py:69 | anonymize_data() | INFO | Pseudonimización exitosa. Columnas eliminadas: ['nombre_completo', 'email', 'profesor_encargado', 'monitor_encargado', 'dato_base_hash']
+2026-04-05 01:17:36,904 | main.py:79 | run_pipeline() | INFO | ==================================================
+2026-04-05 01:17:36,904 | main.py:80 | run_pipeline() | INFO | PIPELINE FINALIZADO EXITOSAMENTE 🚀
+2026-04-05 01:17:36,904 | main.py:81 | run_pipeline() | INFO | Archivo guardado en: data\processed\registro_consolidado.csv
+2026-04-05 01:17:36,904 | main.py:82 | run_pipeline() | INFO | Registros finales: 2022
+2026-04-05 01:17:36,904 | main.py:83 | run_pipeline() | INFO | Tiempo total: 0:00:00.277603
+2026-04-05 01:17:36,904 | main.py:84 | run_pipeline() | INFO | ==================================================
+
+2026-04-05 01:30:46,932 | main.py:43 | run_pipeline() | INFO | ==================================================
+2026-04-05 01:30:46,932 | main.py:44 | run_pipeline() | INFO | INICIANDO PIPELINE DE DATOS - REGISTRO LEA
+2026-04-05 01:30:46,932 | main.py:45 | run_pipeline() | INFO | ==================================================
+2026-04-05 01:30:47,075 | load_data.py:46 | load_excels_from_folder() | INFO | Cargado exitosamente: Registro_LEA2024.xlsx
+2026-04-05 01:30:47,114 | load_data.py:46 | load_excels_from_folder() | INFO | Cargado exitosamente: Registro_LEA2025.xlsx
+2026-04-05 01:30:47,115 | main.py:60 | run_pipeline() | INFO | Dataset consolidado inicial: 2022 registros.
+2026-04-05 01:30:47,116 | clean_date.py:28 | clean_dates() | INFO | Iniciando transformación de fechas y periodos académicos...
+2026-04-05 01:30:47,121 | clean_date.py:69 | clean_dates() | INFO | Transformación temporal finalizada exitosamente.
+2026-04-05 01:30:47,121 | clean_carrera.py:14 | clean_carrera() | INFO | Iniciando limpieza de la columna 'carrera'...
+2026-04-05 01:30:47,127 | text_utils.py:44 | apply_mapping() | WARNING | [carrera] Hay 3 categorías no mapeadas.
+2026-04-05 01:30:47,127 | text_utils.py:45 | apply_mapping() | WARNING | Valores: {'egresada', 'pregrado', 'no aplica'}
+2026-04-05 01:30:47,129 | clean_carrera.py:40 | clean_carrera() | INFO | Limpieza de 'carrera' finalizada exitosamente.
+2026-04-05 01:30:47,130 | clean_curso.py:14 | clean_curso() | INFO | Iniciando limpieza de la columna 'curso'...
+2026-04-05 01:30:47,135 | text_utils.py:44 | apply_mapping() | WARNING | [curso] Hay 1 categorías no mapeadas.
+2026-04-05 01:30:47,136 | text_utils.py:45 | apply_mapping() | WARNING | Valores: {'sin informacion'}
+2026-04-05 01:30:47,138 | clean_curso.py:43 | clean_curso() | INFO | Limpieza de 'curso' finalizada exitosamente.
+2026-04-05 01:30:47,139 | clean_semestre.py:13 | clean_semestre() | INFO | Iniciando limpieza de la columna 'semestre'...
+2026-04-05 01:30:47,140 | clean_semestre.py:29 | clean_semestre() | INFO | Limpieza de 'semestre' finalizada exitosamente.
+2026-04-05 01:30:47,140 | clean_actividades.py:10 | clean_actividades() | INFO | Iniciando limpieza de la columna 'actividades'...
+2026-04-05 01:30:47,146 | clean_actividades.py:22 | clean_actividades() | INFO | Limpieza de 'actividades' finalizada exitosamente.
+2026-04-05 01:30:47,147 | clean_staff.py:14 | clean_staff() | INFO | Iniciando estandarización de profesores y monitores...
+2026-04-05 01:30:47,154 | clean_staff.py:33 | clean_staff() | INFO | Estandarización de staff finalizada exitosamente.
+2026-04-05 01:30:47,154 | anonymization.py:13 | anonymize_data() | INFO | Iniciando proceso de pseudonimización estructurada...
+2026-04-05 01:30:47,170 | anonymization.py:69 | anonymize_data() | INFO | Pseudonimización exitosa. Columnas eliminadas: ['nombre_completo', 'email', 'profesor_encargado', 'monitor_encargado', 'dato_base_hash']
+2026-04-05 01:30:47,185 | main.py:79 | run_pipeline() | INFO | ==================================================
+2026-04-05 01:30:47,185 | main.py:80 | run_pipeline() | INFO | PIPELINE FINALIZADO EXITOSAMENTE 🚀
+2026-04-05 01:30:47,186 | main.py:81 | run_pipeline() | INFO | Archivo guardado en: data\processed\registro_consolidado.csv
+2026-04-05 01:30:47,186 | main.py:82 | run_pipeline() | INFO | Registros finales: 2022
+2026-04-05 01:30:47,186 | main.py:83 | run_pipeline() | INFO | Tiempo total: 0:00:00.253039
+2026-04-05 01:30:47,186 | main.py:84 | run_pipeline() | INFO | ==================================================
+
+2026-04-05 01:37:46,693 | main.py:43 | run_pipeline() | INFO | ==================================================
+2026-04-05 01:37:46,693 | main.py:44 | run_pipeline() | INFO | INICIANDO PIPELINE DE DATOS - REGISTRO LEA
+2026-04-05 01:37:46,693 | main.py:45 | run_pipeline() | INFO | ==================================================
+2026-04-05 01:37:46,844 | load_data.py:46 | load_excels_from_folder() | INFO | Cargado exitosamente: Registro_LEA2024.xlsx
+2026-04-05 01:37:46,881 | load_data.py:46 | load_excels_from_folder() | INFO | Cargado exitosamente: Registro_LEA2025.xlsx
+2026-04-05 01:37:46,883 | main.py:60 | run_pipeline() | INFO | Dataset consolidado inicial: 2022 registros.
+2026-04-05 01:37:46,883 | clean_date.py:28 | clean_dates() | INFO | Iniciando transformación de fechas y periodos académicos...
+2026-04-05 01:37:46,888 | clean_date.py:69 | clean_dates() | INFO | Transformación temporal finalizada exitosamente.
+2026-04-05 01:37:46,888 | clean_carrera.py:14 | clean_carrera() | INFO | Iniciando limpieza de la columna 'carrera'...
+2026-04-05 01:37:46,894 | text_utils.py:44 | apply_mapping() | WARNING | [carrera] Hay 3 categorías no mapeadas.
+2026-04-05 01:37:46,894 | text_utils.py:45 | apply_mapping() | WARNING | Valores: {'pregrado', 'no aplica', 'egresada'}
+2026-04-05 01:37:46,896 | clean_carrera.py:40 | clean_carrera() | INFO | Limpieza de 'carrera' finalizada exitosamente.
+2026-04-05 01:37:46,896 | clean_curso.py:14 | clean_curso() | INFO | Iniciando limpieza de la columna 'curso'...
+2026-04-05 01:37:46,903 | text_utils.py:44 | apply_mapping() | WARNING | [curso] Hay 1 categorías no mapeadas.
+2026-04-05 01:37:46,904 | text_utils.py:45 | apply_mapping() | WARNING | Valores: {'sin informacion'}
+2026-04-05 01:37:46,906 | clean_curso.py:43 | clean_curso() | INFO | Limpieza de 'curso' finalizada exitosamente.
+2026-04-05 01:37:46,906 | clean_semestre.py:13 | clean_semestre() | INFO | Iniciando limpieza de la columna 'semestre'...
+2026-04-05 01:37:46,908 | clean_semestre.py:29 | clean_semestre() | INFO | Limpieza de 'semestre' finalizada exitosamente.
+2026-04-05 01:37:46,908 | clean_actividades.py:10 | clean_actividades() | INFO | Iniciando limpieza de la columna 'actividades'...
+2026-04-05 01:37:46,913 | clean_actividades.py:22 | clean_actividades() | INFO | Limpieza de 'actividades' finalizada exitosamente.
+2026-04-05 01:37:46,914 | clean_staff.py:14 | clean_staff() | INFO | Iniciando estandarización de profesores y monitores...
+2026-04-05 01:37:46,921 | clean_staff.py:33 | clean_staff() | INFO | Estandarización de staff finalizada exitosamente.
+2026-04-05 01:37:46,921 | anonymization.py:13 | anonymize_data() | INFO | Iniciando proceso de pseudonimización estructurada...
+2026-04-05 01:37:46,937 | anonymization.py:69 | anonymize_data() | INFO | Pseudonimización exitosa. Columnas eliminadas: ['nombre_completo', 'email', 'profesor_encargado', 'monitor_encargado', 'dato_base_hash']
+2026-04-05 01:37:46,950 | main.py:79 | run_pipeline() | INFO | ==================================================
+2026-04-05 01:37:46,950 | main.py:80 | run_pipeline() | INFO | PIPELINE FINALIZADO EXITOSAMENTE 🚀
+2026-04-05 01:37:46,951 | main.py:81 | run_pipeline() | INFO | Archivo guardado en: data\processed\registro_consolidado.csv
+2026-04-05 01:37:46,951 | main.py:82 | run_pipeline() | INFO | Registros finales: 2022
+2026-04-05 01:37:46,951 | main.py:83 | run_pipeline() | INFO | Tiempo total: 0:00:00.257951
+2026-04-05 01:37:46,951 | main.py:84 | run_pipeline() | INFO | ==================================================
