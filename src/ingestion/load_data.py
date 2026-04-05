@@ -4,8 +4,8 @@ import pandas as pd
 import re
 import logging
 
-# Configuración del logger para el módulo de ingesta
-logging.basicConfig(level=logging.INFO, format='%(levelname)s - %(message)s')
+# Iniciar el logger
+logger = logging.getLogger(__name__)
 
 # --------------------
 # Función para Ingesta de Múltiples Excels
@@ -77,5 +77,6 @@ def load_excels_from_folder(path: str)-> pd.DataFrame:
     "monitor_encargado_si_aplica": "monitor_encargado"
     }
     combined_df = combined_df.rename(columns=diccionario_mapeo)
+    combined_df = combined_df.drop(columns=['no.'])
 
     return combined_df
