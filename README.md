@@ -40,8 +40,9 @@ graph TD
     C --> D[Normalización snake_case<br/>+ limpieza de texto]
     D --> E[Mapeo por dominio<br/>Carrera · Curso · Semestre · Staff]
     E -->|Jerarquía de Confianza| F(anonymization.py<br/>Hashing SHA-256)
-    F --> G[(registro_consolidado.csv)]
-    G -->|Lectura en caché| H[Streamlit Dashboard<br/>dashboard.py · Plotly Express]
+    F --> G[(data/processed<br/>registro_consolidado.csv)]
+    F --> I[(data/public<br/>registro_consolidado.csv)]
+    I -->|Lectura en caché| H[Streamlit Dashboard<br/>streamlit_app.py · app.py · Plotly]
 ```
 
 **Etapas del pipeline:**
@@ -66,9 +67,11 @@ graph TD
 
 ```text
 registro_LEA/
-├── data/                       <- (excluido: .gitignore - contiene PII) 
-│   ├── raw/
-│   └── processed/
+├── data/
+│   ├── raw/                    <- Excluido: archivos Excel con PII
+│   ├── processed/              <- Excluido: salida local interna
+│   │   └── registro_consolidado.csv
+│   └── public/                 <- Versionado: salida anonimizada para Streamlit Cloud
 │       └── registro_consolidado.csv
 ├── src/
 │   ├── ingestion/
@@ -90,12 +93,13 @@ registro_LEA/
 │   │   └── main.py             <- Orquestador principal del proceso ETL
 │   └── analysis/
 │       └── app.py              <- Aplicación Streamlit + Plotly Express
-├── logs.log                    <- Auditoría de valores huérfanos no mapeados
+├── logs.log                    <- Excluido: auditoría local de valores huérfanos
+├── streamlit_app.py            <- Entrypoint recomendado para Streamlit Community Cloud
 ├── requirements.txt
 └── README.md
 ```
 
-> **Nota:** Los archivos en `data/raw/` y `mappings/staff.py` no se versionan por privacidad. Deben ubicarse manualmente antes de ejecutar el pipeline.
+> **Nota:** Los archivos en `data/raw/`, `data/processed/` y `mappings/staff.py` no se versionan por privacidad. El dashboard desplegado usa `data/public/registro_consolidado.csv`, que se genera anonimizado desde el pipeline.
 
 ---
 
@@ -118,11 +122,12 @@ Registros originales de asistencia exportados desde Microsoft Forms. Estado: cru
 | `Actividad (...)` | STRING | Tema específico de la sesión (ej. "Capacitación R", "Simulador"). |
 | `Correo Institucional` | STRING | Email del estudiante. Fuente primaria de identidad en la Jerarquía de Confianza. |
 
-### Output — `data/processed/registro_consolidado.csv`
+### Output — `data/processed/registro_consolidado.csv` y `data/public/registro_consolidado.csv`
 
 - **0% de PII** — nombres y correos eliminados post-hashing
 - Variables categóricas estandarizadas y legibles
 - Identificadores únicos trazables mediante SHA-256
+- Salida pública versionable para Streamlit Community Cloud
 
 ---
 
@@ -177,17 +182,31 @@ pip install -r requirements.txt
 python src/pipeline/main.py
 ```
 
-Output generado: `data/processed/registro_consolidado.csv`
+Outputs generados:
+
+- `data/processed/registro_consolidado.csv` — archivo local interno, ignorado por Git.
+- `data/public/registro_consolidado.csv` — archivo anonimizado para el dashboard y Streamlit Community Cloud.
 
 > Revisar `logs.log` para auditar valores huérfanos detectados durante el mapeo. Los valores no mapeados no detienen la ejecución — se registran para actualización manual de los diccionarios.
 
 ### Paso 2 — Dashboard
 
 ```bash
-streamlit run src/analysis/app.py
+streamlit run streamlit_app.py
 ```
 
-La aplicación se abre en `http://localhost:8501`.
+La aplicación se abre en `http://localhost:8501`. También puede ejecutarse directamente con `streamlit run src/analysis/app.py`.
+
+### Paso 3 — Streamlit Community Cloud
+
+En Streamlit Community Cloud, usar:
+
+- Repository: `JuanEstiven-Data/registro_LEA`
+- Branch: `main`
+- Main file path: `streamlit_app.py`
+- Python dependencies: `requirements.txt`
+
+El despliegue no necesita `data/raw/`, `data/processed/` ni `mappings/staff.py`; solo consume el CSV público anonimizado.
 
 ---
 
@@ -198,10 +217,10 @@ La aplicación se abre en `http://localhost:8501`.
 - Generación de un Data Mart unificado en `.csv` (sin límite de filas, agnóstico de plataforma)
 - Pseudonimización completa: 0% de PII en el dataset final
 - Dashboard interactivo con filtros dinámicos y gráficos por semestre, carrera, curso y actividad
+- Despliegue del dashboard en Streamlit Community Cloud usando el dataset público anonimizado
 
 **Fuera del alcance:**
 - Conexión automatizada vía API a Microsoft Forms o Microsoft Graph
-- Despliegue en servidores web o infraestructura cloud
 - Modificación del formulario original de recolección
 
 ---
@@ -222,7 +241,7 @@ La aplicación se abre en `http://localhost:8501`.
 
 ## Mejoras futuras
 
-- [ ] Despliegue en Streamlit Community Cloud para acceso remoto sin ejecución local
+- [x] Despliegue preparado para Streamlit Community Cloud con `streamlit_app.py` y `data/public/`
 - [ ] Integración con la API de Microsoft Graph para eliminar la descarga manual de Excel
 - [ ] Pruebas unitarias con `pytest` para validar la integridad de las funciones de limpieza
 

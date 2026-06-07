@@ -158,10 +158,17 @@ def top_mode(series: pd.Series, fallback: str = "Sin datos") -> str:
 @st.cache_data
 def load_data() -> pd.DataFrame:
     base_dir = Path(__file__).resolve().parent.parent.parent
-    data_path = base_dir / "data" / "processed" / "registro_consolidado.csv"
+    data_candidates = [
+        base_dir / "data" / "public" / "registro_consolidado.csv",
+        base_dir / "data" / "processed" / "registro_consolidado.csv",
+    ]
+    data_path = next((path for path in data_candidates if path.exists()), None)
 
-    if not data_path.exists():
-        st.error(f"No se encontró el archivo de datos en: {data_path}")
+    if data_path is None:
+        st.error(
+            "No se encontro el archivo de datos. Ejecuta el pipeline para generar "
+            "data/public/registro_consolidado.csv."
+        )
         st.stop()
 
     data = pd.read_csv(data_path)

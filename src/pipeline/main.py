@@ -34,6 +34,28 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+
+def validate_public_dataset(df: pd.DataFrame) -> None:
+    """
+    Evita publicar columnas con informacion personal en el archivo usado por Streamlit Cloud.
+    """
+    forbidden_columns = {
+        "nombre_completo",
+        "email",
+        "correo_institucional",
+        "profesor_encargado",
+        "monitor_encargado",
+        "dato_base_hash",
+    }
+    present_columns = sorted(forbidden_columns.intersection(df.columns))
+
+    if present_columns:
+        raise ValueError(
+            "El dataset publico conserva columnas sensibles: "
+            f"{', '.join(present_columns)}"
+        )
+
+
 def run_pipeline() -> None:
     """
     Orquesta la ejecución del pipeline ETL utilizando el método .pipe() de Pandas
@@ -48,7 +70,9 @@ def run_pipeline() -> None:
         # 1. Definición de rutas estructuradas
         raw_path = BASE_DIR / 'data' / 'raw'
         processed_path = BASE_DIR / 'data' / 'processed'
-        output_file = processed_path / 'registro_consolidado.csv'
+        public_path = BASE_DIR / 'data' / 'public'
+        internal_output_file = processed_path / 'registro_consolidado.csv'
+        public_output_file = public_path / 'registro_consolidado.csv'
 
         # 2. Ingesta
         df = load_excels_from_folder(str(raw_path))
@@ -72,13 +96,17 @@ def run_pipeline() -> None:
         )
 
         # 4. Exportación
+        validate_public_dataset(df)
         processed_path.mkdir(parents=True, exist_ok=True)
-        df.to_csv(output_file, index=False, encoding='utf-8-sig')
+        public_path.mkdir(parents=True, exist_ok=True)
+        df.to_csv(internal_output_file, index=False, encoding='utf-8-sig')
+        df.to_csv(public_output_file, index=False, encoding='utf-8-sig')
         
         duracion = datetime.now() - start_time
         logger.info("=" * 50)
         logger.info(f"PIPELINE FINALIZADO EXITOSAMENTE 🚀")
-        logger.info(f"Archivo guardado en: {output_file.relative_to(BASE_DIR)}")
+        logger.info(f"Archivo interno guardado en: {internal_output_file.relative_to(BASE_DIR)}")
+        logger.info(f"Archivo publico guardado en: {public_output_file.relative_to(BASE_DIR)}")
         logger.info(f"Registros finales: {len(df)}")
         logger.info(f"Tiempo total: {duracion}")
         logger.info("=" * 50)
