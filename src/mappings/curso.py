@@ -72,6 +72,7 @@ CURSO_MAPPING = {
     # ======================
     # NO SON CURSOS
     # ======================
+    'sin informacion': 'Sin Información',
     'monitoria': 'Monitoría',
     'trabajo de grado': 'Trabajo de Grado',
     'curso lea': 'Curso LEA',

@@ -1,214 +1,239 @@
-# 📊 Registro LEA - Pipeline y Análisis de Monitorías
+# Registro LEA
+### Pipeline ETL y Analítica de Monitorías — Laboratorio de Economía Aplicada
 
-## 🎯 Propósito
+[![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
+[![Pandas](https://img.shields.io/badge/Pandas-2.0%2B-150458.svg)](https://pandas.pydata.org/)
+[![Streamlit](https://img.shields.io/badge/Streamlit-App-FF4B4B.svg)](https://streamlit.io/)
+[![Estado](https://img.shields.io/badge/Estado-En%20producción-brightgreen.svg)]()
 
-Este proyecto automatiza la consolidación, limpieza y análisis de los registros de monitorías del Laboratorio de Economía Aplicada (LEA).
-
-Actualmente, los datos son generados a partir de formularios de Microsoft Forms y requieren limpieza manual, lo que introduce inconsistencias en variables clave como carrera, curso y semestre.
-
-Este sistema busca:
-
-* Estandarizar la información de monitorías
-* Reducir errores humanos en la limpieza
-* Generar un dataset consolidado confiable
-* Proveer un dashboard descriptivo para toma de decisiones
+> Pipeline ETL modular que transforma registros crudos de Microsoft Forms en un Data Mart anonimizado y un dashboard interactivo usado por el director del LEA en reuniones con la Facultad de Economía de la Pontificia Universidad Javeriana.
 
 ---
 
-## 👥 Usuarios
+## Contexto y problema
 
-* Director del laboratorio (usuario principal)
-* Monitores académicos (usuarios operativos)
+El Laboratorio de Economía Aplicada (LEA) de la Javeriana Cali registra la asistencia y participación de estudiantes en sus monitorías a través de Microsoft Forms. Al exportar los datos, los archivos `.xlsx` presentan inconsistencias sistemáticas: errores ortográficos en nombres de carreras y cursos, variaciones tipográficas entre semestres, y duplicados de identidad generados por registros con correos distintos o nombres escritos de forma diferente.
 
-Nivel técnico:
-
-* Intermedio (Python básico o R)
-* No se requiere conocimiento avanzado de programación
+Antes de este proyecto, la limpieza se hacía manualmente cada semestre. Este pipeline la automatiza por completo.
 
 ---
 
-## ❗ Problema actual
+## Impacto
 
-* Limpieza manual de múltiples archivos Excel por semestre
-* Inconsistencias en nombres de cursos, carreras y formatos
-* Diferentes criterios de limpieza entre personas
-* Dificultad para generar reportes confiables
+| Antes | Después |
+|---|---|
+| Limpieza manual de datos cada semestre | Pipeline automatizado: ejecutar `main.py` |
+| PII expuesta en el dataset de análisis | 0% de PII — pseudonimización SHA-256 irreversible |
+| Sin trazabilidad de errores | Log de auditoría con todos los valores huérfanos detectados |
+| Sin visibilidad consolidada histórica | Dashboard interactivo con datos de todos los semestres unificados |
 
----
-
-## 📥 Input de datos
-
-* Archivos Excel exportados desde Microsoft Forms
-* Ubicación esperada:
-
-```
-data/raw/
-```
-
-### Supuestos
-
-* Todos los archivos tienen la misma estructura
-* El formulario no cambia su esquema
-* Columnas obligatorias:
-
-  * `curso`
-  * `carrera`
+**En uso activo:** el director del LEA utiliza el dashboard generado por este pipeline en presentaciones ante la Facultad de Economía.
 
 ---
 
-## ⚙️ Proceso (Pipeline)
+## Arquitectura del sistema
 
-El script ejecuta las siguientes etapas:
+```mermaid
+graph TD
+    A[(Forms / Excel Raw<br/>.xlsx por semestre)] -->|Ingesta automática| B(load_data.py)
+    B --> C{Transformación}
+    C --> D[Normalización snake_case<br/>+ limpieza de texto]
+    D --> E[Mapeo por dominio<br/>Carrera · Curso · Semestre · Staff]
+    E -->|Jerarquía de Confianza| F(anonymization.py<br/>Hashing SHA-256)
+    F --> G[(registro_consolidado.csv)]
+    G -->|Lectura en caché| H[Streamlit Dashboard<br/>dashboard.py · Plotly Express]
+```
 
-1. **Ingesta**
+**Etapas del pipeline:**
 
-   * Carga todos los archivos `.xlsx` de `data/raw/`
-   * Unificación usando concatenación
-
-2. **Estandarización**
-
-   * Normalización de nombres de columnas
-   * Limpieza de texto (minúsculas, tildes, espacios)
-
-3. **Limpieza de variables clave**
-
-   * Carrera
-   * Curso
-   * Semestre
-
-   Incluye:
-
-   * Normalización
-   * Reglas de limpieza
-   * Aplicación de diccionarios de mapeo
-
-4. **Generación de dataset consolidado**
-
-   * Dataset limpio listo para análisis
-
-5. **Análisis descriptivo**
-
-   * Generación de dashboard con matplotlib
+1. **Ingesta automática (`load_data.py`)** — Escanea el directorio, extrae metadatos de año, concatena múltiples archivos `.xlsx` y estandariza cabeceras a `snake_case`.
+2. **Transformación por dominio** — Normalización de texto (tildes, caracteres especiales, ruido estructural) y aplicación de diccionarios de homologación con complejidad O(1) para las variables *Carrera*, *Curso*, *Semestre* y *Staff*.
+3. **Gobernanza y anonimización (`anonymization.py`)** — Implementa una *Jerarquía de Confianza* de 3 niveles para resolución de entidades únicas, seguida de pseudonimización irreversible con SHA-256 sobre toda la PII.
+4. **Carga y auditoría** — Exportación del Data Mart consolidado. Los valores no mapeados se registran en `logs.log` sin detener la ejecución.
 
 ---
 
-## 📤 Output
+## Usuarios
 
-### 1. Dataset consolidado
-
-```
-data/processed/registro_consolidado.xlsx
-```
-
-### 2. Dashboard descriptivo
-
-```
-data/processed/dashboard.png
-```
+| Usuario | Rol en el sistema |
+|---|---|
+| **Director del LEA** | Consumidor del dashboard — toma de decisiones sobre demanda y uso histórico de monitorías |
+| **Monitores y Staff** | Fuente de datos — reporte de actividades vía Microsoft Forms |
 
 ---
 
-## 🚀 Ejecución
+## Estructura del repositorio
 
-### 1. Clonar repositorio
-
+```text
+registro_LEA/
+├── data/                       <- (excluido: .gitignore - contiene PII) 
+│   ├── raw/
+│   └── processed/
+│       └── registro_consolidado.csv
+├── src/
+│   ├── ingestion/
+│   │   └── load_data.py        <- Carga, concatenación y estandarización de cabeceras
+│   ├── cleaning/
+│   │   ├── anonymization.py    <- Jerarquía de Confianza + Hashing SHA-256
+│   │   ├── clean_staff.py
+│   │   ├── clean_carrera.py
+│   │   ├── clean_semestre.py
+│   │   ├── clean_curso.py
+│   │   ├── clean_actividad.py
+│   │   └── text_utils.py
+│   ├── mappings/               <- Diccionarios de homologación por dominio
+│   │   ├── staff.py            <- (excluido: .gitignore — contiene nombres reales)
+│   │   ├── carrera.py
+│   │   ├── curso.py
+│   │   └── actividad.py
+│   ├── pipeline/
+│   │   └── main.py             <- Orquestador principal del proceso ETL
+│   └── analysis/
+│       └── app.py              <- Aplicación Streamlit + Plotly Express
+├── logs.log                    <- Auditoría de valores huérfanos no mapeados
+├── requirements.txt
+└── README.md
 ```
-git clone <repo>
+
+> **Nota:** Los archivos en `data/raw/` y `mappings/staff.py` no se versionan por privacidad. Deben ubicarse manualmente antes de ejecutar el pipeline.
+
+---
+
+## Esquema de datos
+
+### Input — Archivo crudo de registro (`.xlsx`)
+
+Registros originales de asistencia exportados desde Microsoft Forms. Estado: crudo (raw), sin estandarizar.
+
+| Columna | Tipo | Descripción |
+| :--- | :--- | :--- |
+| `No.` | INTEGER | Número de fila en el archivo de origen. |
+| `Fecha` | STRING | Mes de la actividad (ej. "Febrero"). |
+| `Nombres y apellidos` | STRING | Nombre completo del estudiante. Usado en la Jerarquía de Confianza como fallback. |
+| `Carrera` | STRING | Programa académico. Requiere normalización — presenta errores tipográficos frecuentes. |
+| `Semestre` | INTEGER | Nivel académico del estudiante (ej. 3, 5, 6). |
+| `Monitor encargado (si aplica)` | STRING | Monitor que acompañó la sesión. |
+| `Profesor Encargado (si aplica)` | STRING | Profesor titular o responsable del área. |
+| `Curso` | STRING | Asignatura en la que se enmarca la sesión. |
+| `Actividad (...)` | STRING | Tema específico de la sesión (ej. "Capacitación R", "Simulador"). |
+| `Correo Institucional` | STRING | Email del estudiante. Fuente primaria de identidad en la Jerarquía de Confianza. |
+
+### Output — `data/processed/registro_consolidado.csv`
+
+- **0% de PII** — nombres y correos eliminados post-hashing
+- Variables categóricas estandarizadas y legibles
+- Identificadores únicos trazables mediante SHA-256
+
+---
+
+## Gobernanza y privacidad de datos
+
+El módulo `anonymization.py` implementa una **Jerarquía de Confianza de 3 niveles** para resolver la identidad única de cada estudiante antes del hashing:
+
+1. **Email institucional** — máxima confianza (dominio universitario verificable)
+2. **Email personal** — confianza media
+3. **Nombre completo** — fallback de último recurso (mayor riesgo de variaciones tipográficas)
+
+Una vez resuelta la identidad, se aplica **SHA-256** para generar un identificador alfanumérico irreversible. El dataset final no contiene ningún campo de PII.
+
+---
+
+## Stack tecnológico
+
+| Capa | Tecnología |
+|---|---|
+| Lenguaje core | Python 3.10+ |
+| Procesamiento de datos | Pandas 2.0+ |
+| Seguridad y hashing | Hashlib (librería estándar de Python) |
+| Dashboard e interfaz | Streamlit + Plotly Express |
+| Control de versiones | Git / GitHub |
+
+---
+
+## Instrucciones de ejecución
+
+### Prerrequisitos
+
+- Python 3.10 o superior
+- Archivos `.xlsx` por semestre ubicados en `data/raw/`
+- `mappings/staff.py` con el diccionario de normalización del staff (no versionado)
+
+### Paso 1 — Pipeline ETL
+
+```bash
+# Clonar el repositorio
+git clone https://github.com/JuanEstiven-Data/registro_LEA.git
 cd registro_LEA
-```
 
-### 2. Crear entorno virtual
-
-```
+# Crear y activar entorno virtual
 python -m venv .venv
-.venv\Scripts\activate
-```
+# source .venv/bin/activate      # Mac / Linux
+# .venv\Scripts\activate         # Windows
 
-### 3. Instalar dependencias
-
-```
+# Instalar dependencias
 pip install -r requirements.txt
-```
 
-### 4. Ejecutar pipeline
-
-```
+# Ejecutar el orquestador
 python src/pipeline/main.py
 ```
 
----
+Output generado: `data/processed/registro_consolidado.csv`
 
-## 🌍 Portabilidad
+> Revisar `logs.log` para auditar valores huérfanos detectados durante el mapeo. Los valores no mapeados no detienen la ejecución — se registran para actualización manual de los diccionarios.
 
-El proyecto está diseñado para ejecutarse en:
+### Paso 2 — Dashboard
 
-* Windows
-* Linux
-
-Requisitos:
-
-* Python 3.10+
-* pip
-
----
-
-## 🔐 Tratamiento de datos sensibles
-
-El pipeline elimina y/o anonimiza información personal como:
-
-- nombres
-- correos electrónicos
-- identificaciones
-
-Esto garantiza que el dataset final sea apto para análisis y presentación.
-
----
-
-## ⚠️ Supuestos y limitaciones
-
-### Supuestos
-
-* La estructura del formulario no cambia
-* Los archivos se ubican correctamente en `data/raw/`
-* Las columnas clave existen
-
-### Limitaciones actuales
-
-* No hay validación automática de estructura de archivos
-* El dashboard es estático (no interactivo)
-* Dependencia de mappings manuales
-
----
-
-## 📊 Uso del output
-
-El dataset y dashboard se utilizan para:
-
-* Evaluar demanda de monitorías
-* Analizar uso por curso y carrera
-* Apoyar decisiones de contratación de monitores
-* Identificar tendencias académicas
-
----
-
-## 🧠 Arquitectura del proyecto
-
-```
-src/
-├── ingestion/
-├── cleaning/
-├── mappings/
-├── pipeline/
-└── analysis/
+```bash
+streamlit run src/analysis/app.py
 ```
 
----
-
-## 🔮 Mejoras futuras
-
-* Validación automática de estructura de input
-* Dashboard interactivo (Tableau / Plotly)
-* Automatización semestral del proceso
-* Integración directa con fuente de datos
+La aplicación se abre en `http://localhost:8501`.
 
 ---
+
+## Alcance
+
+**Dentro del alcance:**
+- Procesamiento local de archivos `.xlsx` exportados manualmente desde Microsoft Forms
+- Generación de un Data Mart unificado en `.csv` (sin límite de filas, agnóstico de plataforma)
+- Pseudonimización completa: 0% de PII en el dataset final
+- Dashboard interactivo con filtros dinámicos y gráficos por semestre, carrera, curso y actividad
+
+**Fuera del alcance:**
+- Conexión automatizada vía API a Microsoft Forms o Microsoft Graph
+- Despliegue en servidores web o infraestructura cloud
+- Modificación del formulario original de recolección
+
+---
+
+## Supuestos y limitaciones
+
+| Riesgo | Impacto | Mitigación |
+|---|---|---|
+| Cambio en el nombre de columnas del formulario entre semestres | Alto | Estandarización a `snake_case` + excepciones `try/except` con mensaje de error descriptivo |
+| Nuevos programas académicos o cursos no mapeados | Medio | El pipeline no se detiene — registra los valores huérfanos en `logs.log` para actualización manual |
+| Estudiante con correos distintos y variaciones extremas del nombre | Bajo | La Jerarquía de Confianza prioriza el email institucional; casos extremos pueden generar IDs duplicados (falsos negativos) |
+
+**Supuestos base:**
+- Las columnas obligatorias del formulario no cambian de nombre entre semestres
+- Los archivos `.xlsx` se ubican en `data/raw/` con el formato esperado antes de ejecutar
+
+---
+
+## Mejoras futuras
+
+- [ ] Despliegue en Streamlit Community Cloud para acceso remoto sin ejecución local
+- [ ] Integración con la API de Microsoft Graph para eliminar la descarga manual de Excel
+- [ ] Pruebas unitarias con `pytest` para validar la integridad de las funciones de limpieza
+
+---
+
+## Autor
+
+**Juan E. Silva** — Analista BI · Monitor de Investigación LEA · Pontificia Universidad Javeriana  
+[LinkedIn](https://linkedin.com/in/juanestiven-data) · [GitHub](https://github.com/JuanEstiven-Data)
+
+---
+
+*Proyecto desarrollado para el Laboratorio de Economía Aplicada (LEA) — Pontificia Universidad Javeriana, Cali. Uso interno institucional.*
+

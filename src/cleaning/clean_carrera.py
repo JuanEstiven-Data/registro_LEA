@@ -22,7 +22,7 @@ def clean_carrera(df: pd.DataFrame) -> pd.DataFrame:
     df.loc[mask_email, 'carrera_norm'] = 'no aplica'
 
     # Exclusión de Roles
-    roles = ['egresado', 'profesor', 'docente', 'administrativo']
+    roles = ['egresado', 'egresada', 'profesor', 'docente', 'administrativo']
     mask_roles = df['carrera_norm'].str.contains('|'.join(roles), na=False)
     df.loc[mask_roles, 'carrera_norm'] = 'no aplica'
 

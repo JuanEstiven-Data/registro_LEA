@@ -24,8 +24,8 @@ CARRERA_MAPPING = {
     'economía': 'Economía',
     
     # --- POSGRADOS ---
-    'mba': 'Maestría en Administración de Empresas',
-    'maestria en administracion de empresas': 'Maestría en Administración de Empresas',
+    'mba': 'MBA',
+    'maestria en administracion de empresas': 'MBA',
     'maestria en restauracion ecologica': 'Maestría en Restauración Ecológica',
     'maestria politica social': 'Maestría en Política Social',
     'maestria gestion': 'Maestría en Gestión',
@@ -66,7 +66,10 @@ CARRERA_MAPPING = {
     # --- OTROS / CONVENIOS ---
     'cali visible': 'Cali Visible',
     'javeriano collage': 'Javeriano Collage',
+    'pregrado': 'Pregrado',
     
     # --- EXCLUSIONES ADICIONALES ---
+    'no aplica': 'NO APLICA',
+    'egresada': 'NO APLICA',
     'departamento de economia y finanzas': 'NO APLICA'
 }

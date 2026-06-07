@@ -31,7 +31,7 @@ def clean_curso(df: pd.DataFrame) -> pd.DataFrame:
     df['curso'] = apply_mapping(df['curso_norm'], CURSO_MAPPING, 'curso')
 
     # Formato Estético Final para el Dashboard
-    df['curso'] = df['curso'].str.title()
+    #df['curso'] = df['curso'].str.title()
     
     # Aseguramos que 'Sin Información' quede bien escrito si hubo nulos
     mask_sin_info = df['curso'].str.lower() == 'sin información'
