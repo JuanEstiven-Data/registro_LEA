@@ -6,13 +6,12 @@
 [![Streamlit](https://img.shields.io/badge/Streamlit-App-FF4B4B.svg)](https://streamlit.io/)
 [![Estado](https://img.shields.io/badge/Estado-En%20producción-brightgreen.svg)]()
 
-> Pipeline ETL modular que transforma registros crudos de Microsoft Forms en un Data Mart anonimizado y un dashboard interactivo usado por el director del LEA en reuniones con la Facultad de Economía de la Pontificia Universidad Javeriana.
 
 ---
 
 ## Contexto y problema
 
-El Laboratorio de Economía Aplicada (LEA) de la Javeriana Cali registra la asistencia y participación de estudiantes en sus monitorías a través de Microsoft Forms. Al exportar los datos, los archivos `.xlsx` presentan inconsistencias sistemáticas: errores ortográficos en nombres de carreras y cursos, variaciones tipográficas entre semestres, y duplicados de identidad generados por registros con correos distintos o nombres escritos de forma diferente.
+El Laboratorio de Economía Aplicada (LEA) de la Javeriana Cali registra la asistencia y participación de estudiantes en sus monitorías a través de Microsoft Forms. Al exportar los datos, los archivos `.xlsx` presentan inconsistencias sistemáticas: errores ortográficos en nombres de carreras, variaciones tipográficas entre cursos, y duplicados de identidad generados por registros con correos distintos o nombres escritos de forma diferente.
 
 Antes de este proyecto, la limpieza se hacía manualmente cada semestre. Este pipeline la automatiza por completo.
 
@@ -27,7 +26,6 @@ Antes de este proyecto, la limpieza se hacía manualmente cada semestre. Este pi
 | Sin trazabilidad de errores | Log de auditoría con todos los valores huérfanos detectados |
 | Sin visibilidad consolidada histórica | Dashboard interactivo con datos de todos los semestres unificados |
 
-**En uso activo:** el director del LEA utiliza el dashboard generado por este pipeline en presentaciones ante la Facultad de Economía.
 
 ---
 
@@ -40,9 +38,9 @@ graph TD
     C --> D[Normalización snake_case<br/>+ limpieza de texto]
     D --> E[Mapeo por dominio<br/>Carrera · Curso · Semestre · Staff]
     E -->|Jerarquía de Confianza| F(anonymization.py<br/>Hashing SHA-256)
-    F --> G[(data/processed<br/>registro_consolidado.csv)]
-    F --> I[(data/public<br/>registro_consolidado.csv)]
-    I -->|Lectura en caché| H[Streamlit Dashboard<br/>streamlit_app.py · app.py · Plotly]
+    F --> G[(data/public<br/>registro_consolidado.csv)]
+    G -->|Validación mínima| I(accuracy.py)
+    G -->|Lectura en caché| H[Streamlit Dashboard<br/>streamlit_app.py · app.py · Plotly]
 ```
 
 **Etapas del pipeline:**
@@ -58,7 +56,7 @@ graph TD
 
 | Usuario | Rol en el sistema |
 |---|---|
-| **Director del LEA** | Consumidor del dashboard — toma de decisiones sobre demanda y uso histórico de monitorías |
+| **Coordinador del LEA** | Consumidor del dashboard |
 | **Monitores y Staff** | Fuente de datos — reporte de actividades vía Microsoft Forms |
 
 ---
@@ -69,8 +67,6 @@ graph TD
 registro_LEA/
 ├── data/
 │   ├── raw/                    <- Excluido: archivos Excel con PII
-│   ├── processed/              <- Excluido: salida local interna
-│   │   └── registro_consolidado.csv
 │   └── public/                 <- Versionado: salida anonimizada para Streamlit Cloud
 │       └── registro_consolidado.csv
 ├── src/
@@ -82,15 +78,16 @@ registro_LEA/
 │   │   ├── clean_carrera.py
 │   │   ├── clean_semestre.py
 │   │   ├── clean_curso.py
-│   │   ├── clean_actividad.py
+│   │   ├── clean_actividades.py
 │   │   └── text_utils.py
 │   ├── mappings/               <- Diccionarios de homologación por dominio
 │   │   ├── staff.py            <- (excluido: .gitignore — contiene nombres reales)
 │   │   ├── carrera.py
 │   │   ├── curso.py
-│   │   └── actividad.py
+│   │   └── actividades.py
 │   ├── pipeline/
-│   │   └── main.py             <- Orquestador principal del proceso ETL
+│   │   ├── main.py             <- Orquestador principal del proceso ETL
+│   │   └── accuracy.py         <- Validaciones mínimas del output final
 │   └── analysis/
 │       └── app.py              <- Aplicación Streamlit + Plotly Express
 ├── logs.log                    <- Excluido: auditoría local de valores huérfanos
@@ -99,7 +96,7 @@ registro_LEA/
 └── README.md
 ```
 
-> **Nota:** Los archivos en `data/raw/`, `data/processed/` y `mappings/staff.py` no se versionan por privacidad. El dashboard desplegado usa `data/public/registro_consolidado.csv`, que se genera anonimizado desde el pipeline.
+> **Nota:** Los archivos en `data/raw/` y `mappings/staff.py` no se versionan por privacidad. El dashboard desplegado usa `data/public/registro_consolidado.csv`, que se genera anonimizado desde el pipeline.
 
 ---
 
@@ -122,12 +119,12 @@ Registros originales de asistencia exportados desde Microsoft Forms. Estado: cru
 | `Actividad (...)` | STRING | Tema específico de la sesión (ej. "Capacitación R", "Simulador"). |
 | `Correo Institucional` | STRING | Email del estudiante. Fuente primaria de identidad en la Jerarquía de Confianza. |
 
-### Output — `data/processed/registro_consolidado.csv` y `data/public/registro_consolidado.csv`
+### Output — `data/public/registro_consolidado.csv`
 
 - **0% de PII** — nombres y correos eliminados post-hashing
 - Variables categóricas estandarizadas y legibles
 - Identificadores únicos trazables mediante SHA-256
-- Salida pública versionable para Streamlit Community Cloud
+- Salida versionable para Streamlit Community Cloud
 
 ---
 
@@ -182,14 +179,19 @@ pip install -r requirements.txt
 python src/pipeline/main.py
 ```
 
-Outputs generados:
-
-- `data/processed/registro_consolidado.csv` — archivo local interno, ignorado por Git.
-- `data/public/registro_consolidado.csv` — archivo anonimizado para el dashboard y Streamlit Community Cloud.
+Output generado: `data/public/registro_consolidado.csv`
 
 > Revisar `logs.log` para auditar valores huérfanos detectados durante el mapeo. Los valores no mapeados no detienen la ejecución — se registran para actualización manual de los diccionarios.
 
-### Paso 2 — Dashboard
+### Paso 2 — Validación mínima
+
+```bash
+python src/pipeline/accuracy.py
+```
+
+Este comando ejecuta el pipeline y valida esquema, privacidad, fechas, ciclos y preparación básica para análisis cruzado.
+
+### Paso 3 — Dashboard
 
 ```bash
 streamlit run streamlit_app.py
@@ -197,7 +199,7 @@ streamlit run streamlit_app.py
 
 La aplicación se abre en `http://localhost:8501`. También puede ejecutarse directamente con `streamlit run src/analysis/app.py`.
 
-### Paso 3 — Streamlit Community Cloud
+### Paso 4 — Streamlit Community Cloud
 
 En Streamlit Community Cloud, usar:
 
@@ -206,7 +208,7 @@ En Streamlit Community Cloud, usar:
 - Main file path: `streamlit_app.py`
 - Python dependencies: `requirements.txt`
 
-El despliegue no necesita `data/raw/`, `data/processed/` ni `mappings/staff.py`; solo consume el CSV público anonimizado.
+El despliegue no necesita `data/raw/` ni `mappings/staff.py`; solo consume el CSV público anonimizado.
 
 ---
 
@@ -243,7 +245,8 @@ El despliegue no necesita `data/raw/`, `data/processed/` ni `mappings/staff.py`;
 
 - [x] Despliegue preparado para Streamlit Community Cloud con `streamlit_app.py` y `data/public/`
 - [ ] Integración con la API de Microsoft Graph para eliminar la descarga manual de Excel
-- [ ] Pruebas unitarias con `pytest` para validar la integridad de las funciones de limpieza
+- [x] Validaciones mínimas del pipeline con `src/pipeline/accuracy.py`
+- [ ] Pruebas unitarias con `pytest` para funciones críticas de limpieza
 
 ---
 

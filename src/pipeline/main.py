@@ -10,6 +10,7 @@ import pandas as pd
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 SRC_DIR = BASE_DIR / 'src'
 sys.path.append(str(SRC_DIR))
+OUTPUT_FILE = BASE_DIR / 'data' / 'public' / 'registro_consolidado.csv'
 
 # --- IMPORTACIONES MODULARES ---
 from ingestion.load_data import load_excels_from_folder
@@ -56,7 +57,7 @@ def validate_public_dataset(df: pd.DataFrame) -> None:
         )
 
 
-def run_pipeline() -> None:
+def run_pipeline(output_file: Path | None = None) -> Path:
     """
     Orquesta la ejecución del pipeline ETL utilizando el método .pipe() de Pandas
     para un procesamiento fluido, encadenado y funcional.
@@ -69,17 +70,13 @@ def run_pipeline() -> None:
     try:
         # 1. Definición de rutas estructuradas
         raw_path = BASE_DIR / 'data' / 'raw'
-        processed_path = BASE_DIR / 'data' / 'processed'
-        public_path = BASE_DIR / 'data' / 'public'
-        internal_output_file = processed_path / 'registro_consolidado.csv'
-        public_output_file = public_path / 'registro_consolidado.csv'
+        output_file = output_file or OUTPUT_FILE
 
         # 2. Ingesta
         df = load_excels_from_folder(str(raw_path))
         
         if df.empty:
-            logger.error("El proceso se detuvo: No hay datos para procesar en la ruta origen.")
-            return
+            raise ValueError("No hay datos para procesar en la ruta origen.")
             
         logger.info(f"Dataset consolidado inicial: {len(df)} registros.")
 
@@ -97,22 +94,21 @@ def run_pipeline() -> None:
 
         # 4. Exportación
         validate_public_dataset(df)
-        processed_path.mkdir(parents=True, exist_ok=True)
-        public_path.mkdir(parents=True, exist_ok=True)
-        df.to_csv(internal_output_file, index=False, encoding='utf-8-sig')
-        df.to_csv(public_output_file, index=False, encoding='utf-8-sig')
+        output_file.parent.mkdir(parents=True, exist_ok=True)
+        df.to_csv(output_file, index=False, encoding='utf-8-sig')
         
         duracion = datetime.now() - start_time
         logger.info("=" * 50)
         logger.info(f"PIPELINE FINALIZADO EXITOSAMENTE 🚀")
-        logger.info(f"Archivo interno guardado en: {internal_output_file.relative_to(BASE_DIR)}")
-        logger.info(f"Archivo publico guardado en: {public_output_file.relative_to(BASE_DIR)}")
+        logger.info(f"Archivo guardado en: {output_file.relative_to(BASE_DIR)}")
         logger.info(f"Registros finales: {len(df)}")
         logger.info(f"Tiempo total: {duracion}")
         logger.info("=" * 50)
+        return output_file
 
     except Exception as e:
         logger.critical(f"ERROR FATAL EN EL PIPELINE: {str(e)}", exc_info=True)
+        raise
 
 if __name__ == "__main__":
     run_pipeline()

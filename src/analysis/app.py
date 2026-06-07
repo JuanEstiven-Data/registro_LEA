@@ -109,8 +109,9 @@ def style_figure(fig: go.Figure, height: int = 420) -> go.Figure:
         plot_bgcolor=SURFACE,
         margin=dict(l=12, r=12, t=52, b=28),
         font=dict(family="Inter, Segoe UI, Arial, sans-serif", color=TEXT),
-        title_font=dict(color=TEXT),
+        title=dict(text="", font=dict(color=TEXT)),
         legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0),
+        legend_title_text="",
         legend_font=dict(color=TEXT),
         hoverlabel=dict(bgcolor=SURFACE, bordercolor="#D7E0EA", font=dict(color=TEXT)),
     )
@@ -158,13 +159,9 @@ def top_mode(series: pd.Series, fallback: str = "Sin datos") -> str:
 @st.cache_data
 def load_data() -> pd.DataFrame:
     base_dir = Path(__file__).resolve().parent.parent.parent
-    data_candidates = [
-        base_dir / "data" / "public" / "registro_consolidado.csv",
-        base_dir / "data" / "processed" / "registro_consolidado.csv",
-    ]
-    data_path = next((path for path in data_candidates if path.exists()), None)
+    data_path = base_dir / "data" / "public" / "registro_consolidado.csv"
 
-    if data_path is None:
+    if not data_path.exists():
         st.error(
             "No se encontro el archivo de datos. Ejecuta el pipeline para generar "
             "data/public/registro_consolidado.csv."
